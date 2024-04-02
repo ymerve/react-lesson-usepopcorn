@@ -58,21 +58,17 @@ export default function App() {
 	const [watched, setWatched] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
+	const [selectedId, setSelectedId] = useState("tt4172224");
 	const tempQuery = "interstellar";
 
-	// useEffect(function () {
-	// 	console.log("After initial render because of empty array '[]'");
-	// }, []);
+	const handleSelectMove = (id) => {
+		setSelectedId((selectedId) => (id === selectedId ? null : id)); // aynisi secilir ise toggle butonu gibi calis ve kapat.
+	}
 
-	// useEffect(function () {
-	// 	console.log("After each render.");
-	// }); // if not added [] each render run.
+	const handleCloseMovie = () => {
+		setSelectedId(null);
+	}
 
-	// useEffect(function () {
-	// 	console.log("Just after query render")
-	// }, [query]);
-
-	console.log("During render");
 	useEffect(function () {
 		async function fetchMovies() {
 			try {
@@ -96,6 +92,13 @@ export default function App() {
 				setIsLoading(false);
 			}
 		}
+
+		if (query.length < 3) {
+			setMovies([]);
+			setError("") // reset error
+			return;
+		}
+
 		fetchMovies()
 	}, [query]);
 
@@ -112,12 +115,17 @@ export default function App() {
 						<MovieList movies={movies} />
 					} */}
 					{isLoading && <Loader />}
-					{!isLoading && !error && <MovieList movies={movies} />}
+					{!isLoading && !error && <MovieList movies={movies} onSelectMovie={handleSelectMove} />}
 					{error && <ErrorMessage message={error} />}
 				</Box>
 				<Box>
-					<WatchedSummary watched={watched} />
-					<WatchedMoviesList watched={watched} />
+					{selectedId ?
+						<MovieDetails selectedId={selectedId} onCloseMovie={handleCloseMovie} /> :
+						<>
+							<WatchedSummary watched={watched} />
+							<WatchedMoviesList watched={watched} />
+						</>
+					}
 				</Box>
 
 			</Main>
@@ -212,6 +220,15 @@ function WatchedMovie({ movie }) {
 	);
 }
 
+function MovieDetails({ selectedId, onCloseMovie }) {
+	return (
+		<div className="details">
+			<button className="btn-back" onClick={onCloseMovie}>&larr;</button>
+			{selectedId}
+		</div>
+	);
+}
+
 function WatchedSummary({ watched }) {
 	const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
 	const avgUserRating = average(watched.map((movie) => movie.userRating));
@@ -256,17 +273,17 @@ function Box({ children }) {
 		</div>
 	);
 }
-function MovieList({ movies }) {
+function MovieList({ movies, onSelectMovie }) {
 	return (
-		<ul className="list">
-			{movies?.map((movie, i) => <Movie key={i} movie={movie} />)}
+		<ul className="list list-movies">
+			{movies?.map((movie, i) => <Movie key={i} movie={movie} onSelectMovie={onSelectMovie} />)}
 		</ul>
 	);
 }
 
-function Movie({ movie }) {
+function Movie({ movie, onSelectMovie }) {
 	return (
-		<li key={movie.imdbID}>
+		<li key={movie.imdbID} onClick={() => { onSelectMovie(movie.imdbID) }}>
 			<img src={movie.Poster} alt={`${movie.Title} poster`} />
 			<h3>{movie.Title}</h3>
 			<div>
