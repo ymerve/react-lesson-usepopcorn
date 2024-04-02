@@ -237,6 +237,11 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watchedMovies })
 	}, [selectedId]);
 	// NOTE : selectedId guncellendikce render et.
 
+	useEffect(function () {
+		if (!title) return;
+		document.title = `Movie | ${title}`;
+	}, [title]);
+
 	return (
 		<div className="details">
 			{isLoading ?
