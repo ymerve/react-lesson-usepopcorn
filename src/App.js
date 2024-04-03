@@ -7,7 +7,7 @@ const average = (arr) =>
 const KEY = "b4feddf8";
 
 export default function App() {
-	const [query, setQuery] = useState("inception");
+	const [query, setQuery] = useState("");
 	const [movies, setMovies] = useState([]);
 	const [watched, setWatched] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -51,9 +51,10 @@ export default function App() {
 				setSelectedId(data?.Search[0]?.imdbID)
 				setError("");
 			} catch (err) {
-				console.log(err.message);
-				if (err.name !== "AbortError")
+				if (err.name !== "AbortError") {
+					console.log(err.message);
 					setError(err.message);
+				}
 			} finally {
 				setIsLoading(false);
 			}
@@ -64,7 +65,7 @@ export default function App() {
 			setError("") // reset error
 			return;
 		}
-
+		handleCloseMovie();
 		fetchMovies();
 
 		return () => {
@@ -245,6 +246,19 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watchedMovies })
 		getMovieDetails();
 	}, [selectedId]);
 	// NOTE : selectedId guncellendikce render et.
+
+	useEffect(function () {
+		const callback = (e) => {
+			if (e.code === "Escape") {
+				onCloseMovie();
+				console.log("CLOSING");
+			}
+		}
+		document.addEventListener("keydown", callback);
+		return () => {
+			document.removeEventListener("keydown", callback); // clean up yapmazsak her escape de yeniden cagirilir callback.
+		}
+	}, [onCloseMovie]);
 
 	useEffect(function () {
 		if (!title) return;
