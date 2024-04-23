@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import StarRating from "./StarRating"
+import StarRating from "./StarRating";
 import { useMovies } from "./useMovies";
+import { useLocalStorageState } from "./useLocalStorageState";
 
 const average = (arr) =>
 	arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -11,10 +12,7 @@ export default function App() {
 	const [query, setQuery] = useState("");
 	const [selectedId, setSelectedId] = useState(null);
 
-	const [watched, setWatched] = useState(function () {
-		const storagedValue = localStorage.getItem("watched");
-		return JSON.parse(storagedValue);
-	});
+	const [watched, setWatched] = useLocalStorageState([], "watched");
 
 	const handleSelectMove = (id) => {
 		setSelectedId((prevId) => (id === prevId ? null : id));
@@ -31,10 +29,6 @@ export default function App() {
 	const handleDeleteWatched = (id) => {
 		setWatched((watched) => watched.filter(movie => movie.imdbID !== id));
 	}
-
-	useEffect(function () {
-		localStorage.setItem("watched", JSON.stringify(watched));
-	}, [watched]);
 
 	const { movies, isLoading, error } = useMovies(query);
 
@@ -114,7 +108,7 @@ function Search({ query, setQuery }) {
 		// console.log(inputEl.current, "input el");
 		// inputEl.current.focus();
 		function callback(e) {
-			if (document.activeElement == inputEl) return;
+			if (document.activeElement === inputEl) return;
 			if (e.code === "Enter") {
 				inputEl.current.focus();
 				setQuery("");
