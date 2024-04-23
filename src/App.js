@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import { useMovies } from "./useMovies";
 import { useLocalStorageState } from "./useLocalStorageState";
+import { useKey } from "./useKey";
 
 const average = (arr) =>
 	arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -104,25 +105,11 @@ function NumResults({ movies }) {
 function Search({ query, setQuery }) {
 	const inputEl = useRef(null);
 
-	useEffect(function () {
-		// console.log(inputEl.current, "input el");
-		// inputEl.current.focus();
-		function callback(e) {
-			if (document.activeElement === inputEl) return;
-			if (e.code === "Enter") {
-				inputEl.current.focus();
-				setQuery("");
-			}
-		}
-		document.addEventListener("keydown", callback);
-		return () => document.addEventListener("keydown", callback);
-	}, [setQuery]);
-
-	// useEffect(function () {
-	// 	const el = document.querySelector('.search');
-	// 	console.log(el)
-	// 	el.focus();
-	// }, [])
+	useKey("Enter", function () {
+		if (document.activeElement === inputEl) return;
+		inputEl.current.focus();
+		setQuery("");
+	});
 
 	return (
 		<input
@@ -250,18 +237,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watchedMovies })
 	}, [selectedId]);
 	// NOTE : selectedId guncellendikce render et.
 
-	useEffect(function () {
-		const callback = (e) => {
-			if (e.code === "Escape") {
-				onCloseMovie();
-				console.log("CLOSING");
-			}
-		}
-		document.addEventListener("keydown", callback);
-		return () => {
-			document.removeEventListener("keydown", callback); // clean up yapmazsak her escape de yeniden cagirilir callback.
-		}
-	}, [onCloseMovie]);
+	useKey("Escape", onCloseMovie);
 
 	useEffect(function () {
 		if (!title) return;
